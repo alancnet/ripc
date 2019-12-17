@@ -1,5 +1,5 @@
 const { defer } = require('gefer')
-const ChildProcess = require('child_process')
+const cluster = require('cluster')
 const callsite = require('callsite')
 const path = require('path')
 const EventEmitter = require('events')
@@ -45,7 +45,10 @@ const ripc = (process, scope) => {
       const stack = callsite()
       process = path.join(path.dirname(stack[1].getFileName()), process)
     }
-    process = ChildProcess.fork(process)
+    cluster.setupMaster({
+      exec: process
+    })
+    process = cluster.fork()
   }
   if (!process instanceof EventEmitter) {
     throw new Error("`process` must be a string or an EventEmitter.")
