@@ -1,0 +1,15 @@
+{
+  "name": "ripc",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alancnet/ripc.git"
+  },
+  "dependencies": {
+    "callsite": "^1.0.0",
+    "gefer": "^1.0.1"
+  }
+}
