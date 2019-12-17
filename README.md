@@ -23,7 +23,7 @@ main()
 worker.js:
 
 ```javascript
-const ripc = require('../..')
+const ripc = require('ripc')
 
 ripc(process, {
   greet() {

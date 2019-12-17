@@ -9,12 +9,14 @@ const bindConfig = {
   get(obj, key) {
     if (key in obj) return obj[key]
     return function (...args) {
+      const stack = callsite().slice(1)
       const deferred = defer()
       const id = i++
       const req = {
         id,
         ...deferred,
-        args
+        args,
+        stack
       }
       if (obj.exitCode == null && obj.exitSignal == null) {
         obj.process.send({
@@ -68,7 +70,10 @@ const ripc = (process, scope) => {
         try {
           result = await scope[message.cmd](...message.args)
         } catch (err) {
-          error = err
+          error = {
+            message: err.message,
+            stack: err.stack
+          }
         } finally {
           try {
             process.send({
@@ -90,13 +95,24 @@ const ripc = (process, scope) => {
           error: `${message.cmd} does not exist in scope.`
         })
       }
-    } else if (message.type === 'response' && obj.pendingRequests.has(message.id)) {
-      const req = obj.pendingRequests.get(message.id)
-      obj.pendingRequests.delete(message.id)
-      if (message.success) {
-        req.resolve(message.result)
+    } else if (message.type === 'response') {
+      if (obj.pendingRequests.has(message.id)) {
+        const req = obj.pendingRequests.get(message.id)
+        obj.pendingRequests.delete(message.id)
+        if (message.success) {
+          req.resolve(message.result)
+        } else {
+          const err = new Error(message.error.message)
+          err.stack = [
+            message.error.message,
+            ...message.error.stack.split('\n').filter(x => x.startsWith('    at ')),
+            '    at --[ RIPC Inter-Process Communication ]--',
+            ...req.stack.map(x => `    at ${x}`)
+          ].join('\n')
+          req.reject(err)
+        }
       } else {
-        req.reject(message.error)
+        console.warn('Response received for non-existent request:', message)
       }
     }
   })
