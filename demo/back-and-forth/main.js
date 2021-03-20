@@ -3,7 +3,7 @@ const ripc = require('../..')
 async function main() {
   const name = 'World'
 
-  const worker = ripc('./worker', {
+  const worker = ripc('./worker.js', {
     getName() {
       return name
     }

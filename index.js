@@ -41,10 +41,6 @@ const bindConfig = {
 
 const ripc = (process, scope) => {
   if (typeof process === 'string') {
-    if (process.startsWith('.')) {
-      const stack = callsite()
-      process = path.join(path.dirname(stack[1].getFileName()), process)
-    }
     cluster.setupMaster({
       exec: process
     })

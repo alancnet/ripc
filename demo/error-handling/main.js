@@ -1,5 +1,5 @@
 const ripc = require('../..')
-const worker = ripc('./worker')
+const worker = ripc('./worker.js')
 
 async function main() {
   try {
